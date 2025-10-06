@@ -1,0 +1,114 @@
+---
+title: "Tidy Tuesday (2025-10-07): EuroLeague Basketball"
+format: html
+date: last-modified
+execute:
+    cache: true
+code-fold: true
+---
+
+# Intro
+
+## Libraries
+
+```{r}
+#| label: libraries
+
+library(tidyverse)
+```
+
+## Background
+
+Below is copied from [GitHub](https://github.com/rfordatascience/tidytuesday/blob/main/data/2025/2025-10-07/readme.md).
+
+This week we’re exploring EuroLeague Basketball, the premier men’s club basketball competition in Europe.
+
+The dataset contains information on EuroLeague teams, including their country, home city, arena, seating capacity, and historical performance (Final Four appearances and titles won).
+
+The dataset is curated from publicly available sources such as Wikipedia and official EuroLeague records, and was packaged in the EuroleagueBasketball R package, with documentation available at natanast.github.io/EuroleagueBasketball.
+
+"The EuroLeague is the top-tier European professional basketball club competition, widely regarded as the most prestigious competition in European basketball." — EuroLeague
+
+**Questions**
+
+ - Which countries are most represented in the EuroLeague?
+ - How do arena capacities compare across teams and countries? In R, the readr::parse_number() function might be helpful here.
+ - Which clubs have been the most successful historically?
+
+Thank you to Natasa Anastasiadou for curating this week's dataset.
+
+## Load Data
+
+```{r}
+#| label: load-data
+#| output: false
+
+tuesdata <- tidytuesdayR::tt_load('2025-10-07')
+
+euroleague_basketball <- tuesdata$euroleague_basketball |> 
+    rename_with(str_to_lower) |> 
+    rename_with(\(col_name) str_replace(col_name, " ", "_"))
+```
+
+## Wrangle
+
+```{r}
+#| label: wrangle-capacity
+
+tb_capacity <- euroleague_basketball |>
+    select(team, home_city, arena, capacity, country) |> 
+    separate_longer_delim(c(arena, capacity), ", ")
+```
+
+
+```{r}
+#| label: wrangle-finalfour
+
+tb_finalfour <- euroleague_basketball |> 
+    select(
+        team, home_city, last_season, country, 
+        years_of_finalfour_appearances, years_of_titles_won
+        ) |> 
+    separate_longer_delim(years_of_finalfour_appearances, ", ") |> 
+    separate_wider_delim(
+        years_of_titles_won, ", ", 
+        names_sep = "", too_few = "align_start"
+        ) |> 
+    mutate(
+        won_title = if_any(
+            contains("years_of_titles_won"), 
+            \(year) year == years_of_finalfour_appearances
+    )) |> 
+    mutate(won_title = replace_na(won_title, F)) |> 
+    select(-contains("years_of_titles_won")) |> 
+    rename(final_four_appearance = years_of_finalfour_appearances)
+```
+
+# Exploratory Analysis
+
+## Most Represented Countries
+
+```{r}
+#| label: fig-most-rep
+
+euroleague_basketball |> 
+    group_by(country) |> 
+    count() |> 
+    arrange(desc(n)) |> 
+    ungroup() |> 
+    mutate(country = fct_inorder(country)) |> 
+    ggplot(aes(country, n, fill = country)) +
+    geom_col() +
+    labs(
+        title = "Spain has more basketball teams in the EuroLeague than any other country.",
+        y = "number of teams"
+        ) +
+    theme(
+        legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+## Arena Capacities
+
+## Most Winningest Teams
+
