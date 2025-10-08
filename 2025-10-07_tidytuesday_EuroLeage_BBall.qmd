@@ -13,6 +13,7 @@ code-fold: true
 
 ```{r}
 #| label: libraries
+#| echo: false
 
 library(tidyverse)
 ```
@@ -57,7 +58,8 @@ euroleague_basketball <- tuesdata$euroleague_basketball |>
 
 tb_capacity <- euroleague_basketball |>
     select(team, home_city, arena, capacity, country) |> 
-    separate_longer_delim(c(arena, capacity), ", ")
+    separate_longer_delim(c(arena, capacity), ", ") |> 
+    mutate(capacity = as.integer(str_remove(capacity, ",")))
 ```
 
 
@@ -109,6 +111,31 @@ euroleague_basketball |>
 ```
 
 ## Arena Capacities
+
+```{r}
+#| label: area-caps
+
+tb_capacity_summary <- tb_capacity |> 
+    distinct(arena, .keep_all = T) |> 
+    group_by(country) |> 
+    summarize(country_cap = sum(capacity)) |> 
+    arrange(desc(country_cap)) |> 
+    mutate(country = fct_inorder(country))
+
+tb_capacity_factor <- tb_capacity |> 
+    mutate(country = factor(country, levels = tb_capacity_summary$country)) |> 
+    mutate(team = fct_reorder(
+            team, capacity,
+            sum, .desc = T
+        )) |> 
+    arrange(country, team, desc(capacity)) |> 
+    mutate(arena = fct_inorder(arena))
+
+tb_capacity_factor |> 
+    distinct(arena, .keep_all = T) |> 
+    ggplot(aes(country, capacity, fill = arena)) +
+    geom_bar(position = "stack", stat = "identity")
+```
 
 ## Most Winningest Teams
 

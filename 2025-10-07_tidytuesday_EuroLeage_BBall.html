@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="dcterms.date" content="2025-10-06">
+<meta name="dcterms.date" content="2025-10-08">
 
 <title>Tidy Tuesday (2025-10-07): EuroLeague Basketball</title>
 <style>
@@ -93,7 +93,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">October 6, 2025</p>
+      <p class="date">October 8, 2025</p>
     </div>
   </div>
   
@@ -148,22 +148,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>tuesdata <span class="ot">&lt;-</span> tidytuesdayR<span class="sc">::</span><span class="fu">tt_load</span>(<span class="st">'2025-10-07'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stderr">
-<pre><code>---- Compiling #TidyTuesday Information for 2025-10-07 ----
---- There is 1 file available ---
-
-
-── Downloading files ───────────────────────────────────────────────────────────
-
-  1 of 1: "euroleague_basketball.csv"</code></pre>
-</div>
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>euroleague_basketball <span class="ot">&lt;-</span> tuesdata<span class="sc">$</span>euroleague_basketball <span class="sc">|&gt;</span> </span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rename_with</span>(str_to_lower) <span class="sc">|&gt;</span> </span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rename_with</span>(\(col_name) <span class="fu">str_replace</span>(col_name, <span class="st">" "</span>, <span class="st">"_"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>tuesdata <span class="ot">&lt;-</span> tidytuesdayR<span class="sc">::</span><span class="fu">tt_load</span>(<span class="st">'2025-10-07'</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>euroleague_basketball <span class="ot">&lt;-</span> tuesdata<span class="sc">$</span>euroleague_basketball <span class="sc">|&gt;</span> </span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rename_with</span>(str_to_lower) <span class="sc">|&gt;</span> </span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rename_with</span>(\(col_name) <span class="fu">str_replace</span>(col_name, <span class="st">" "</span>, <span class="st">"_"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -172,34 +161,78 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>tb_capacity <span class="ot">&lt;-</span> euroleague_basketball <span class="sc">|&gt;</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(team, home_city, arena, capacity, country) <span class="sc">|&gt;</span> </span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">separate_longer_delim</span>(<span class="fu">c</span>(arena, capacity), <span class="st">", "</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>tb_capacity <span class="ot">&lt;-</span> euroleague_basketball <span class="sc">|&gt;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(team, home_city, arena, capacity, country) <span class="sc">|&gt;</span> </span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">separate_longer_delim</span>(<span class="fu">c</span>(arena, capacity), <span class="st">", "</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>tb_finalfour <span class="ot">&lt;-</span> euroleague_basketball <span class="sc">|&gt;</span> </span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        team, home_city, last_season, country, </span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>        years_of_finalfour_appearances, years_of_titles_won</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        ) <span class="sc">|&gt;</span> </span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">separate_longer_delim</span>(years_of_finalfour_appearances, <span class="st">", "</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">separate_wider_delim</span>(</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>        years_of_titles_won, <span class="st">", "</span>, </span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">names_sep =</span> <span class="st">""</span>, <span class="at">too_few =</span> <span class="st">"align_start"</span></span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>        ) <span class="sc">|&gt;</span> </span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">won_title =</span> <span class="fu">if_any</span>(</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>            <span class="fu">contains</span>(<span class="st">"years_of_titles_won"</span>), </span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>            \(year) year <span class="sc">==</span> years_of_finalfour_appearances</span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    )) <span class="sc">|&gt;</span> </span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">won_title =</span> <span class="fu">replace_na</span>(won_title, F)) <span class="sc">|&gt;</span> </span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(<span class="sc">-</span><span class="fu">contains</span>(<span class="st">"years_of_titles_won"</span>)) <span class="sc">|&gt;</span> </span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rename</span>(<span class="at">final_four_appearance =</span> years_of_finalfour_appearances)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>tb_finalfour <span class="ot">&lt;-</span> euroleague_basketball <span class="sc">|&gt;</span> </span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        team, home_city, last_season, country, </span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        years_of_finalfour_appearances, years_of_titles_won</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        ) <span class="sc">|&gt;</span> </span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">separate_longer_delim</span>(years_of_finalfour_appearances, <span class="st">", "</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">separate_wider_delim</span>(</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        years_of_titles_won, <span class="st">", "</span>, </span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">names_sep =</span> <span class="st">""</span>, <span class="at">too_few =</span> <span class="st">"align_start"</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        ) <span class="sc">|&gt;</span> </span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">won_title =</span> <span class="fu">if_any</span>(</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>            <span class="fu">contains</span>(<span class="st">"years_of_titles_won"</span>), </span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>            \(year) year <span class="sc">==</span> years_of_finalfour_appearances</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    )) <span class="sc">|&gt;</span> </span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">won_title =</span> <span class="fu">replace_na</span>(won_title, F)) <span class="sc">|&gt;</span> </span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(<span class="sc">-</span><span class="fu">contains</span>(<span class="st">"years_of_titles_won"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rename</span>(<span class="at">final_four_appearance =</span> years_of_finalfour_appearances)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
+</section>
+</section>
+<section id="exploratory-analysis" class="level1">
+<h1>Exploratory Analysis</h1>
+<section id="most-represented-countries" class="level2">
+<h2 class="anchored" data-anchor-id="most-represented-countries">Most Represented Countries</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>euroleague_basketball <span class="sc">|&gt;</span> </span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(country) <span class="sc">|&gt;</span> </span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">count</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(<span class="fu">desc</span>(n)) <span class="sc">|&gt;</span> </span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ungroup</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">country =</span> <span class="fu">fct_inorder</span>(country)) <span class="sc">|&gt;</span> </span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(country, n, <span class="at">fill =</span> country)) <span class="sc">+</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_col</span>() <span class="sc">+</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>        <span class="at">title =</span> <span class="st">"Spain has more basketball teams in the EuroLeague than any other country."</span>,</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">y =</span> <span class="st">"number of teams"</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>        ) <span class="sc">+</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.position =</span> <span class="st">"none"</span>,</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-most-rep" class="quarto-float quarto-figure quarto-figure-center anchored" width="672">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-most-rep-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="2025-10-07_tidytuesday_EuroLeage_BBall_files/figure-html/fig-most-rep-1.png" id="fig-most-rep" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-most-rep-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="arena-capacities" class="level2">
+<h2 class="anchored" data-anchor-id="arena-capacities">Arena Capacities</h2>
+</section>
+<section id="most-winningest-teams" class="level2">
+<h2 class="anchored" data-anchor-id="most-winningest-teams">Most Winningest Teams</h2>
 </section>
 </section>
 
