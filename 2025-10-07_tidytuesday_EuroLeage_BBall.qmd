@@ -16,6 +16,8 @@ code-fold: true
 #| echo: false
 
 library(tidyverse)
+library(scales)
+library(RColorBrewer)
 ```
 
 ## Background
@@ -131,11 +133,56 @@ tb_capacity_factor <- tb_capacity |>
     arrange(country, team, desc(capacity)) |> 
     mutate(arena = fct_inorder(arena))
 
-tb_capacity_factor |> 
-    distinct(arena, .keep_all = T) |> 
+tb_capacity_color <- tb_capacity_factor |> 
+    nest(.by = country) |> 
+    mutate(h = seq(0, 0.9, length.out = n_distinct(country))) |> 
+    unnest(data) |>
+    group_by(country) |> 
+    mutate(
+        s = seq(1, by = -0.1, length.out = length(country)),
+        v = seq(1, by = -0.2, length.out = length(country)),
+        hex_col = hsv(h,s,v)) |> 
+    mutate(arena_city = str_c(arena, " (", home_city, ")"))
+
+tb_capacity_color |> 
+    distinct(arena_city, .keep_all = T) |> 
     ggplot(aes(country, capacity, fill = arena)) +
-    geom_bar(position = "stack", stat = "identity")
+    geom_bar(position = "stack", stat = "identity") +
+    scale_fill_manual(values = tb_capacity_color$hex_col) +
+    labs(
+        title = "Arena capacities of EuroLeague Basketball teams",
+        y = "arean capacity") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
+
+This analysis is made a little bit complicated by the fact that two different Serbian teams share the same arena. 
 
 ## Most Winningest Teams
 
+
+```{r}
+#| label: colors
+
+tb_colors <- tibble(
+    h = seq(0, 0.9, length.out = 11),
+    s = h,
+    v = h
+    ) |>
+    expand(h, s, v) |> 
+    mutate(hex = hsv(h, s, v))
+```
+
+```{r}
+
+h <- 0.01
+s <- 0
+v <- 0.1
+
+c_col <- c(
+    hsv(0.51, 1, 1),
+    hsv(0.5 - h, 1 - s, 1 - v),
+    hsv(0.5 - 2*h, 1 - 2*s, 1 - 2*v)
+)
+
+show_col(c_col)
+```
