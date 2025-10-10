@@ -18,6 +18,9 @@ code-fold: true
 library(tidyverse)
 library(scales)
 library(RColorBrewer)
+library(spData)
+library(maps)
+library(ggrepel)
 ```
 
 ## Background
@@ -153,12 +156,21 @@ tb_capacity_color |>
         title = "Arena capacities of EuroLeague Basketball teams",
         y = "arean capacity") +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+tb_capacity_color |> 
+    distinct(arena_city, .keep_all = T) |> 
+    ggplot(aes(country, capacity, fill = capacity)) +
+    geom_bar(position = "stack", stat = "identity") +
+    viridis::scale_fill_viridis(option = "A") +
+    labs(
+        title = "Arena capacities of EuroLeague Basketball teams",
+        y = "arean capacity") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 This analysis is made a little bit complicated by the fact that two different Serbian teams share the same arena. 
 
-## Most Winningest Teams
-
+### Experiments with Color
 
 ```{r}
 #| label: colors
@@ -186,3 +198,42 @@ c_col <- c(
 
 show_col(c_col)
 ```
+
+### Mapping
+
+```{r}
+#| label: maps
+
+world_subset <- world |> 
+    inner_join(
+        tb_capacity_factor, join_by(name_long == country),
+        relationship = "many-to-many")
+
+tb_capacity_gps <- world.cities |> 
+    mutate(name = 
+            case_match(
+                name, 
+                "Tel Aviv-Yafo" ~ "Tel Aviv", 
+                "Vitoria" ~ "Vitoria-Gasteiz",
+                "Piraieus" ~ "Piraeus",
+                "Fontvieille" ~ "Monaco",
+                .default = name)) |> 
+    rename(home_city = name, country = country.etc) |> 
+    inner_join(tb_capacity_factor, join_by(home_city, country))
+
+ggplot() +
+    geom_sf(data = world) +
+    geom_sf(data = world_subset, aes(fill = name_long)) +
+    geom_point(data = tb_capacity_gps, aes(long, lat, color = capacity, size = capacity)) +
+    viridis::scale_color_viridis(option = "A") +
+    geom_text_repel(
+        data = distinct(tb_capacity_gps, arena, .keep_all = T), 
+        aes(long, lat, label = arena),
+        force = 2) +
+    coord_sf(xlim = c(-30, 60), ylim = c(25, 75))
+```
+
+Note that Monaco is a soverign city-state and micrstate bording France.
+
+## Most Winningest Teams
+
