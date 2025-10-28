@@ -18,6 +18,7 @@ code-fold: true
 library(tidyverse)
 library(scales)
 library(RColorBrewer)
+library(sf)
 library(spData)
 library(maps)
 library(ggrepel)
@@ -51,9 +52,9 @@ Thank you to Natasa Anastasiadou for curating this week's dataset.
 
 tuesdata <- tidytuesdayR::tt_load('2025-10-07')
 
-euroleague_basketball <- tuesdata$euroleague_basketball |> 
-    rename_with(str_to_lower) |> 
-    rename_with(\(col_name) str_replace(col_name, " ", "_"))
+euroleague_basketball <- tuesdata$euroleague_basketball |>
+  rename_with(str_to_lower) |>
+  rename_with(\(col_name) str_replace(col_name, " ", "_"))
 ```
 
 ## Wrangle
@@ -62,33 +63,40 @@ euroleague_basketball <- tuesdata$euroleague_basketball |>
 #| label: wrangle-capacity
 
 tb_capacity <- euroleague_basketball |>
-    select(team, home_city, arena, capacity, country) |> 
-    separate_longer_delim(c(arena, capacity), ", ") |> 
-    mutate(capacity = as.integer(str_remove(capacity, ",")))
+  select(team, home_city, arena, capacity, country) |>
+  separate_longer_delim(c(arena, capacity), ", ") |>
+  mutate(capacity = as.integer(str_remove(capacity, ",")))
 ```
 
 
 ```{r}
 #| label: wrangle-finalfour
 
-tb_finalfour <- euroleague_basketball |> 
-    select(
-        team, home_city, last_season, country, 
-        years_of_finalfour_appearances, years_of_titles_won
-        ) |> 
-    separate_longer_delim(years_of_finalfour_appearances, ", ") |> 
-    separate_wider_delim(
-        years_of_titles_won, ", ", 
-        names_sep = "", too_few = "align_start"
-        ) |> 
-    mutate(
-        won_title = if_any(
-            contains("years_of_titles_won"), 
-            \(year) year == years_of_finalfour_appearances
-    )) |> 
-    mutate(won_title = replace_na(won_title, F)) |> 
-    select(-contains("years_of_titles_won")) |> 
-    rename(final_four_appearance = years_of_finalfour_appearances)
+tb_finalfour <- euroleague_basketball |>
+  select(
+    team,
+    home_city,
+    last_season,
+    country,
+    years_of_finalfour_appearances,
+    years_of_titles_won
+  ) |>
+  separate_longer_delim(years_of_finalfour_appearances, ", ") |>
+  separate_wider_delim(
+    years_of_titles_won,
+    ", ",
+    names_sep = "",
+    too_few = "align_start"
+  ) |>
+  mutate(
+    won_title = if_any(
+      contains("years_of_titles_won"),
+      \(year) year == years_of_finalfour_appearances
+    )
+  ) |>
+  mutate(won_title = replace_na(won_title, F)) |>
+  select(-contains("years_of_titles_won")) |>
+  rename(final_four_appearance = years_of_finalfour_appearances)
 ```
 
 # Exploratory Analysis
@@ -98,21 +106,22 @@ tb_finalfour <- euroleague_basketball |>
 ```{r}
 #| label: fig-most-rep
 
-euroleague_basketball |> 
-    group_by(country) |> 
-    count() |> 
-    arrange(desc(n)) |> 
-    ungroup() |> 
-    mutate(country = fct_inorder(country)) |> 
-    ggplot(aes(country, n, fill = country)) +
-    geom_col() +
-    labs(
-        title = "Spain has more basketball teams in the EuroLeague than any other country.",
-        y = "number of teams"
-        ) +
-    theme(
-        legend.position = "none",
-        axis.text.x = element_text(angle = 45, hjust = 1))
+euroleague_basketball |>
+  group_by(country) |>
+  count() |>
+  arrange(desc(n)) |>
+  ungroup() |>
+  mutate(country = fct_inorder(country)) |>
+  ggplot(aes(country, n, fill = country)) +
+  geom_col() +
+  labs(
+    title = "Spain has more basketball teams in the EuroLeague than any other country.",
+    y = "number of teams"
+  ) +
+  theme(
+    legend.position = "none",
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
 ```
 
 ## Arena Capacities
@@ -120,52 +129,59 @@ euroleague_basketball |>
 ```{r}
 #| label: area-caps
 
-tb_capacity_summary <- tb_capacity |> 
-    distinct(arena, .keep_all = T) |> 
-    group_by(country) |> 
-    summarize(country_cap = sum(capacity)) |> 
-    arrange(desc(country_cap)) |> 
-    mutate(country = fct_inorder(country))
+tb_capacity_summary <- tb_capacity |>
+  distinct(arena, .keep_all = T) |>
+  group_by(country) |>
+  summarize(country_cap = sum(capacity)) |>
+  arrange(desc(country_cap)) |>
+  mutate(country = fct_inorder(country))
 
-tb_capacity_factor <- tb_capacity |> 
-    mutate(country = factor(country, levels = tb_capacity_summary$country)) |> 
-    mutate(team = fct_reorder(
-            team, capacity,
-            sum, .desc = T
-        )) |> 
-    arrange(country, team, desc(capacity)) |> 
-    mutate(arena = fct_inorder(arena))
+tb_capacity_factor <- tb_capacity |>
+  mutate(country = factor(country, levels = tb_capacity_summary$country)) |>
+  mutate(
+    team = fct_reorder(
+      team,
+      capacity,
+      sum,
+      .desc = T
+    )
+  ) |>
+  arrange(country, team, desc(capacity)) |>
+  mutate(arena = fct_inorder(arena))
 
-tb_capacity_color <- tb_capacity_factor |> 
-    nest(.by = country) |> 
-    mutate(h = seq(0, 0.9, length.out = n_distinct(country))) |> 
-    unnest(data) |>
-    group_by(country) |> 
-    mutate(
-        s = seq(1, by = -0.1, length.out = length(country)),
-        v = seq(1, by = -0.2, length.out = length(country)),
-        hex_col = hsv(h,s,v)) |> 
-    mutate(arena_city = str_c(arena, " (", home_city, ")"))
+tb_capacity_color <- tb_capacity_factor |>
+  nest(.by = country) |>
+  mutate(h = seq(0, 0.9, length.out = n_distinct(country))) |>
+  unnest(data) |>
+  group_by(country) |>
+  mutate(
+    s = seq(1, by = -0.1, length.out = length(country)),
+    v = seq(1, by = -0.2, length.out = length(country)),
+    hex_col = hsv(h, s, v)
+  ) |>
+  mutate(arena_city = str_c(arena, " (", home_city, ")"))
 
-tb_capacity_color |> 
-    distinct(arena_city, .keep_all = T) |> 
-    ggplot(aes(country, capacity, fill = arena)) +
-    geom_bar(position = "stack", stat = "identity") +
-    scale_fill_manual(values = tb_capacity_color$hex_col) +
-    labs(
-        title = "Arena capacities of EuroLeague Basketball teams",
-        y = "arean capacity") +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+tb_capacity_color |>
+  distinct(arena_city, .keep_all = T) |>
+  ggplot(aes(country, capacity, fill = arena)) +
+  geom_bar(position = "stack", stat = "identity") +
+  scale_fill_manual(values = tb_capacity_color$hex_col) +
+  labs(
+    title = "Arena capacities of EuroLeague Basketball teams",
+    y = "arean capacity"
+  ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-tb_capacity_color |> 
-    distinct(arena_city, .keep_all = T) |> 
-    ggplot(aes(country, capacity, fill = capacity)) +
-    geom_bar(position = "stack", stat = "identity") +
-    viridis::scale_fill_viridis(option = "A") +
-    labs(
-        title = "Arena capacities of EuroLeague Basketball teams",
-        y = "arean capacity") +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+tb_capacity_color |>
+  distinct(arena_city, .keep_all = T) |>
+  ggplot(aes(country, capacity, fill = capacity)) +
+  geom_bar(position = "stack", stat = "identity") +
+  viridis::scale_fill_viridis(option = "A") +
+  labs(
+    title = "Arena capacities of EuroLeague Basketball teams",
+    y = "arean capacity"
+  ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 This analysis is made a little bit complicated by the fact that two different Serbian teams share the same arena. 
@@ -176,12 +192,12 @@ This analysis is made a little bit complicated by the fact that two different Se
 #| label: colors
 
 tb_colors <- tibble(
-    h = seq(0, 0.9, length.out = 11),
-    s = h,
-    v = h
-    ) |>
-    expand(h, s, v) |> 
-    mutate(hex = hsv(h, s, v))
+  h = seq(0, 0.9, length.out = 11),
+  s = h,
+  v = h
+) |>
+  expand(h, s, v) |>
+  mutate(hex = hsv(h, s, v))
 ```
 
 ```{r}
@@ -191,9 +207,9 @@ s <- 0
 v <- 0.1
 
 c_col <- c(
-    hsv(0.51, 1, 1),
-    hsv(0.5 - h, 1 - s, 1 - v),
-    hsv(0.5 - 2*h, 1 - 2*s, 1 - 2*v)
+  hsv(0.51, 1, 1),
+  hsv(0.5 - h, 1 - s, 1 - v),
+  hsv(0.5 - 2 * h, 1 - 2 * s, 1 - 2 * v)
 )
 
 show_col(c_col)
@@ -204,33 +220,43 @@ show_col(c_col)
 ```{r}
 #| label: maps
 
-world_subset <- world |> 
-    inner_join(
-        tb_capacity_factor, join_by(name_long == country),
-        relationship = "many-to-many")
+data(world)
 
-tb_capacity_gps <- world.cities |> 
-    mutate(name = 
-            case_match(
-                name, 
-                "Tel Aviv-Yafo" ~ "Tel Aviv", 
-                "Vitoria" ~ "Vitoria-Gasteiz",
-                "Piraieus" ~ "Piraeus",
-                "Fontvieille" ~ "Monaco",
-                .default = name)) |> 
-    rename(home_city = name, country = country.etc) |> 
-    inner_join(tb_capacity_factor, join_by(home_city, country))
+world_subset <- world |>
+  inner_join(
+    tb_capacity_factor,
+    join_by(name_long == country),
+    relationship = "many-to-many"
+  )
+
+tb_capacity_gps <- world.cities |>
+  mutate(
+    name = case_match(
+      name,
+      "Tel Aviv-Yafo" ~ "Tel Aviv",
+      "Vitoria" ~ "Vitoria-Gasteiz",
+      "Piraieus" ~ "Piraeus",
+      "Fontvieille" ~ "Monaco",
+      .default = name
+    )
+  ) |>
+  rename(home_city = name, country = country.etc) |>
+  inner_join(tb_capacity_factor, join_by(home_city, country))
 
 ggplot() +
-    geom_sf(data = world) +
-    geom_sf(data = world_subset, aes(fill = name_long)) +
-    geom_point(data = tb_capacity_gps, aes(long, lat, color = capacity, size = capacity)) +
-    viridis::scale_color_viridis(option = "A") +
-    geom_text_repel(
-        data = distinct(tb_capacity_gps, arena, .keep_all = T), 
-        aes(long, lat, label = arena),
-        force = 2) +
-    coord_sf(xlim = c(-30, 60), ylim = c(25, 75))
+  geom_sf(data = world) +
+  geom_sf(data = world_subset, aes(fill = name_long)) +
+  geom_point(
+    data = tb_capacity_gps,
+    aes(long, lat, color = capacity, size = capacity)
+  ) +
+  viridis::scale_color_viridis(option = "A") +
+  geom_text_repel(
+    data = distinct(tb_capacity_gps, arena, .keep_all = T),
+    aes(long, lat, label = arena),
+    force = 2
+  ) +
+  coord_sf(xlim = c(-30, 60), ylim = c(25, 75))
 ```
 
 Note that Monaco is a soverign city-state and micrstate bording France.
