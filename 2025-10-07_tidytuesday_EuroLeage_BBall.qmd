@@ -259,7 +259,7 @@ ggplot() +
   coord_sf(xlim = c(-30, 60), ylim = c(25, 75))
 ```
 
-Note that Monaco is a soverign city-state and micrstate bording France.
+Note that Monaco is a soverign city-state and microstate bording France.
 
 ## Most Winningest Teams
 
